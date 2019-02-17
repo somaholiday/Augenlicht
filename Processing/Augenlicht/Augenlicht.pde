@@ -43,7 +43,7 @@ final int DEMO_FADE_TIME = 60 * 3;        // frames
 int lastFingerCount = 0;
 
 void setup() {
-  size(800, 400, P2D);
+  size(400, 400);
 
   colorMode(HSB, 100);
 
