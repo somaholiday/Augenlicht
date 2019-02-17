@@ -1,11 +1,7 @@
-import de.voidplus.leapmotion.*;
-
 // LEDs
 OPC opc;
 
 // LEAP
-LeapMotion leap;
-int lastId = -1;
 float lastX, lastY;
 PImage texture;
 Ring rings[];
