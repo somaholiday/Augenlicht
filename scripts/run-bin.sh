@@ -8,7 +8,7 @@
 PROCESSING_JAVA=/usr/local/bin/processing-java
 
 BASE_DIR=/home/pi/Augenlicht/
-LOG_DIR="${BASE_DIR}logs/"
+LOG_DIR="${BASE_DIR}"
 SKETCH_DIR="${BASE_DIR}Processing/"
 
 SKETCH_NAME=Augenlicht
@@ -20,6 +20,12 @@ BIN_DIR=application.linux-armv6hf/
 BIN_FULL="${SKETCH_FULL}/$BIN_DIR$SKETCH_NAME"
 
 COMMAND=$BIN_FULL
+
+
+echo "Starting Fadecandy server"
+FC_COMMAND="${BASE_DIR}server/fcserver-rpi"
+sudo $FC_COMMAND &
+
 
 echo "Running sketch binary from:"
 echo "${SKETCH_FULL}/$BIN_DIR"
