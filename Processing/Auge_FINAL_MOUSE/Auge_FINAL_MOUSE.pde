@@ -1,10 +1,19 @@
+import oscP5.*;
+
 // LEDs
 OPC opc;
+final String OPC_IP = "127.0.0.1";
+final int OPC_PORT = 7890;
 
 // LEAP
 float lastX, lastY;
+float oscX, oscY;
 PImage texture;
 Ring rings[];
+
+// OSC
+OscP5 oscP5;
+final int OSC_PORT = 12000;
 
 // DEMO MODE
 String[] demoImageFiles = new String[] {
@@ -41,10 +50,11 @@ void setup() {
   initLEDs();
   initMouseImages();
   initDemoImages();
+  initOSC();
 }
 
 void initLEDs() {
-  opc = new OPC(this, "127.0.0.1", 7890);
+  opc = new OPC(this, OPC_IP, OPC_PORT);
   
   opc.setStatusLed(false);
   opc.showLocations(true);
@@ -79,6 +89,10 @@ void initDemoImages() {
   currentImage = floor(random(demoImages.length));
 }
 
+void initOSC() {
+  oscP5 = new OscP5(this, OSC_PORT);
+}
+
 //////////////////
 //  D  R  A  W  //
 //////////////////
@@ -86,7 +100,7 @@ void initDemoImages() {
 void draw() {
   background(0);
 
-  if (lastX == mouseX && lastY == mouseY) {
+  if (lastX == oscX && lastY == oscY) {
     timeSinceInteraction++;
     //if (timeSinceInteraction % 60 == 0) {
     //  println(timeSinceInteraction);
@@ -110,8 +124,8 @@ void draw() {
     drawMouse();
   }
   
-  lastX = mouseX;
-  lastY = mouseY;
+  lastX = oscX;
+  lastY = oscY;
 
   drawFPS();
 }
@@ -146,11 +160,11 @@ void drawMouse() {
   opc.setColorCorrection(2.5, bri, bri, bri);
   background(0);
 
-  float x = mouseX;
-  float y = mouseY;
+  float x = oscX;
+  float y = oscY;
 
-  float smoothX = lastX + (x - lastX) * 0.2;
-  float smoothY = lastY + (y - lastY) * 0.2;
+  float smoothX = lastX + (x - lastX) * 0.8;
+  float smoothY = lastY + (y - lastY) * 0.8;
 
   rings[int(random(rings.length))].respawn(lastX, lastY, smoothX, smoothY);
 
@@ -170,5 +184,53 @@ void drawFPS() {
 }
 
 void keyPressed() {
-  currentImage = (currentImage + 1) % demoImageFiles.length;
+  nextImage();
+}
+
+void nextImage() {
+  updateImage(1);
+}
+
+void prevImage() {
+  updateImage(-1);
+}
+
+void updateImage(int inc) {
+  currentImage = (currentImage + inc) % demoImageFiles.length;
+  if (currentImage < 0) {
+    currentImage = demoImageFiles.length - 1;  
+  }
+}
+
+void handleOscMouse(OscMessage message) {
+  oscX = message.get(0).floatValue() * width;
+  oscY = message.get(1).floatValue() * height;
+  
+  //println("x:" + oscX);
+  //println("y:" + oscY);
+}
+
+void oscEvent(OscMessage message) {
+  //print("### received an osc message.");
+  //print(" addrPattern: " + message.addrPattern());
+  //print(" typetag: " + message.typetag());
+  //println();
+  
+  switch(message.addrPattern()) {
+    case "/mouse/xy":
+      handleOscMouse(message);
+      break;
+    case "/image/next":
+      if (message.get(0).floatValue() == 1) {
+        //println("Received next");
+        nextImage();
+      }
+      break;
+    case "/image/prev":
+      if (message.get(0).floatValue() == 1) {
+        //println("Received prev");
+        prevImage();
+      }
+      break;
+  }
 }
