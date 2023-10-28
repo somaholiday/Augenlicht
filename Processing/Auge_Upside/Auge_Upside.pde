@@ -10,20 +10,10 @@ float lastX, lastY;
 PImage texture;
 Ring rings[];
 
-// DEMO MODE IMAGES
-String[] demoImageFiles = new String[] {
-  "bokeh.jpeg", 
-  "flames.jpeg", 
-  //  "gradients.jpeg", 
-  //  "lines.jpeg", 
-  //  "painting.jpeg", 
-  "rainbow1.jpeg", 
-  "rainbow2.jpeg", 
-  "rainbow3.jpeg", 
-  "rainbow4.jpeg", 
-  "rainbow5.jpeg"
-};
 
+
+// DEMO MODE IMAGES
+String[] demoImageFiles;
 PImage[] demoImages;
 
 int currentImage = 0;
@@ -43,6 +33,22 @@ void setup() {
   frameRate(60);
 
   colorMode(HSB, 100);
+
+  // we'll have a look in the data folder
+  java.io.File folder = new java.io.File(dataPath(""));
+
+  // list the files in the data folder
+  String[] filenames = folder.list();
+
+  // get and display the number of jpg files
+  println(filenames.length + " jpg files in specified directory");
+
+  // display the filenames
+  for (int i = 0; i < filenames.length; i++) {
+    println(filenames[i]);
+  }
+  
+  demoImageFiles = filenames;
 
   initLEDs();
   initLeap();
@@ -66,7 +72,7 @@ void initLEDs() {
 void initLeap() {
   //leap = new LeapMotion(this);
 
-  texture = loadImage("ring.png");
+  //texture = loadImage("ring.png");
 
   // We can have up to 100 rings. They all start out invisible.
   rings = new Ring[100];
@@ -133,9 +139,7 @@ void drawImageMapping()
   float demoFadeOutConstrained = constrain(DEMO_IMAGE_DURATION - demoDuration, 0, DEMO_FADE_TIME);
   float brightnessTime = min(demoDurationConstrained, demoFadeOutConstrained);
   float bri = map(brightnessTime, 0, DEMO_FADE_TIME, 0, 0.9);
-  
-  println(bri);
- 
+
   opc.setColorCorrection(2.5, bri, bri, bri);
 
   PImage img = demoImages[currentImage];
@@ -147,20 +151,20 @@ void drawImageMapping()
   float speed = 0.05;
   float y = (millis() * -speed) % imHeight;
 
-  // Use two copies of the image, so it seems to repeat infinitely  
+  // Use two copies of the image, so it seems to repeat infinitely
   image(img, 0, y, width, imHeight);
   image(img, 0, y + imHeight, width, imHeight);
-  
+
   demoDuration++;
-  
+
   if (demoDuration > DEMO_IMAGE_DURATION + 10) {
     nextDemoImage();
   }
 }
 
 void nextDemoImage() {
-    currentImage = (currentImage + 1) % demoImageFiles.length;
-    demoDuration = 0; 
+  currentImage = (currentImage + 1) % demoImageFiles.length;
+  demoDuration = 0;
 }
 
 //void drawLeap() {
